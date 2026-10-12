@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diccionario de Personajes Bíblicos</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background-color: #f1f5f9;
+      color: #1e293b;
+      padding: 12px;
+    }
+    .app-card {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+    header h1 {
+      text-align: center;
+      color: #1e3a8a;
+      font-size: 1.4rem;
+      margin-bottom: 15px;
+    }
+    /* Barra de búsqueda superior */
+    .search-container {
+      position: sticky;
+      top: 0;
+      background: #ffffff;
+      padding-bottom: 10px;
+      z-index: 10;
+    }
+    .search-input {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 1rem;
+      border: 2px solid #cbd5e1;
+      border-radius: 10px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-input:focus {
+      border-color: #2563eb;
+    }
+    /* Índice alfabético */
+    .alphabet-index {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      justify-content: center;
+      margin: 12px 0 18px 0;
+    }
+    .letter-btn {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: #334155;
+    }
+    .letter-btn.active {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #2563eb;
+    }
+    /* Tarjetas de Personajes */
+    .character-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-left: 5px solid #2563eb;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .character-name {
+      color: #1e3a8a;
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .character-definition {
+      font-weight: 600;
+      color: #0f172a;
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+    }
+    .character-details {
+      color: #475569;
+      font-size: 0.9rem;
+      line-height: 1.45;
+      margin-bottom: 10px;
+    }
+    /* Enlace a JW.org */
+    .jw-link {
+      display: inline-block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #2563eb;
+      text-decoration: none;
+      background: #eff6ff;
+      padding: 6px 10px;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    .jw-link:hover {
+      background: #dbeafe;
+    }
+    .no-results {
+      text-align: center;
+      color: #64748b;
+      margin: 30px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-card">
+    <header>
+      <h1>📖 Personajes de la Biblia</h1>
+    </header>
+
+    <!-- 1. BÚSQUEDA ARRIBA -->
+    <div class="search-container">
+      <input type="text" id="searchInput" class="search-input" placeholder="🔍 Buscar personaje bíblico...">
+    </div>
+
+    <!-- 2. ÍNDICE ALFABÉTICO -->
+    <div class="alphabet-index" id="alphabetNav"></div>
+
+    <!-- 3. LISTA DE PERSONAJES -->
+    <div id="characterList"></div>
+  </div>
+
+  <script>
+    // Base de datos de ejemplo con enlace de búsqueda personalizado para JW.org
+    const personajes = [
+      {
+        nombre: "Adán",
+        definicion: "El primer hombre",
+        detalles: "Creado por Dios del polvo de la tierra. Habitó en el Edén y comió del fruto prohibido a causa de la tentación, desobedeciendo el mandato divino.",
+        busqueda: "Adán"
+      },
+      {
+        nombre: "Abraham",
+        definicion: "Padre de la fe y de la nación de Israel",
+        detalles: "Llamado por Dios desde Ur de los Caldeos. Destacó por su obediencia al estar dispuesto a ofrecer a su hijo Isaac en sacrificio.",
+        busqueda: "Abraham"
+      },
+      {
+        nombre: "David",
+        definicion: "Segundo rey de Israel y profeta",
+        detalles: "Venció al gigante Goliat siendo joven. Fue un hombre conforme al corazón de Dios y autor de gran parte de los Salmos.",
+        busqueda: "David"
+      },
+      {
+        nombre: "Eva",
+        definicion: "La primera mujer",
+        detalles: "Creada por Dios de la costilla de Adán para ser su compañera y madre de toda la humanidad.",
+        busqueda: "Eva"
+      },
+      {
+        nombre: "Jacob",
+        definicion: "Patriarca del pueblo de Israel",
+        detalles: "Hijo de Isaac. Su nombre fue cambiado a Israel y sus doce hijos dieron origen a las doce tribus de Israel.",
+        busqueda: "Jacob"
+      },
+      {
+        nombre: "Jesús",
+        definicion: "El Mesías y Hijo de Dios",
+        detalles: "Nació en Belén, enseñó el Reino de Dios, realizó milagros, murió en la cruz por la redención y resucitó al tercer día.",
+        busqueda: "Jesucristo"
+      },
+      {
+        nombre: "Job",
+        definicion: "Ejemplo de paciencia y fe inquebrantable",
+        detalles: "Hombre justo que sufrió la pérdida de su familia y salud, manteniendo su integridad y confianza en Dios.",
+        busqueda: "Job"
+      },
+      {
+        nombre: "Jonás",
+        definicion: "Profeta enviado a la ciudad de Nínive",
+        detalles: "Intentó huir en un barco, fue tragado por un gran pez y posteriormente cumplió su misión de predicar en Nínive.",
+        busqueda: "Jonás"
+      },
+      {
+        nombre: "José",
+        definicion: "Hijo de Jacob y gobernador de Egipto",
+        detalles: "Vendido como esclavo por sus hermanos, llegó a ser virrey de Egipto gracias a la sabiduría divina, salvando a su familia.",
+        busqueda: "José hijo de Jacob"
+      },
+      {
+        nombre: "Moisés",
+        definicion: "Líder y libertador del pueblo de Israel",
+        detalles: "Guió el Éxodo fuera de Egipto, cruzó el Mar Rojo y recibió la Ley de Dios en el Monte Sinaí.",
+        busqueda: "Moisés"
+      },
+      {
+        nombre: "Noé",
+        definicion: "Constructor del arca del Diluvio",
+        detalles: "Construyó un arca por mandato divino para salvar a su familia y a los animales del Diluvio Universal.",
+        busqueda: "Noé"
+      },
+      {
+        nombre: "Pablo",
+        definicion: "Apóstol de los gentiles",
+        detalles: "Antiguo perseguidor de cristianos convertido en el camino a Damasco. Escribió numerosas cartas inspiradas del Nuevo Testamento.",
+        busqueda: "apóstol Pablo"
+      },
+      {
+        nombre: "Pedro",
+        definicion: "Apóstol y pilar de la congregación primitiva",
+        detalles: "Pescador llamado por Jesús, conocido por su franqueza y por ser una figura clave en los inicios del cristianismo.",
+        busqueda: "apóstol Pedro"
+      }
+    ];
+
+    const characterList = document.getElementById('characterList');
+    const searchInput = document.getElementById('searchInput');
+    const alphabetNav = document.getElementById('alphabetNav');
+
+    // Ordenar alfabéticamente
+    personajes.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+
+    // Generar botones del índice alfabético
+    const abecedario = ['Todos', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
+    abecedario.forEach(letra => {
+      const btn = document.createElement('button');
+      btn.classList.add('letter-btn');
+      if (letra === 'Todos') btn.classList.add('active');
+      btn.innerText = letra;
+      btn.onclick = () => filtrarPorLetra(letra, btn);
+      alphabetNav.appendChild(btn);
+    });
+
+    // Mostrar lista de personajes
+    function renderizarPersonajes(lista) {
+      characterList.innerHTML = '';
+      if (lista.length === 0) {
+        characterList.innerHTML = '<p class="no-results">No se encontraron personajes que coincidan.</p>';
+        return;
+      }
+      lista.forEach(p => {
+        const card = document.createElement('div');
+        card.classList.add('character-card');
+        
+        // Enlace dinámico de búsqueda hacia JW.org
+        const linkJW = `https://wol.jw.org/es/wol/s/r4/lp-s?q=${encodeURIComponent(p.busqueda)}`;
+
+        card.innerHTML = `
+          <div class="character-name">${p.nombre}</div>
+          <div class="character-definition">${p.definicion}</div>
+          <div class="character-details">${p.detalles}</div>
+          <a href="${linkJW}" target="_blank" class="jw-link">🔍 Buscar más en JW.ORG</a>
+        `;
+        characterList.appendChild(card);
+      });
+    }
+
+    // Filtrar mediante la barra de búsqueda
+    searchInput.addEventListener('input', (e) => {
+      const texto = e.target.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      document.querySelectorAll('.letter-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector('.letter-btn').classList.add('active');
+
+      const filtrados = personajes.filter(p => {
+        const nombreNormal = p.nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const definicionNormal = p.definicion.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const detallesNormal = p.detalles.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return nombreNormal.includes(texto) || definicionNormal.includes(texto) || detallesNormal.includes(texto);
+      });
+
+      renderizarPersonajes(filtrados);
+    });
+
+    // Filtrar al pulsar una letra del índice
+    function filtrarPorLetra(letra, boton) {
+      document.querySelectorAll('.letter-btn').forEach(b => b.classList.remove('active'));
+      boton.classList.add('active');
+      searchInput.value = '';
+
+      if (letra === 'Todos') {
+        renderizarPersonajes(personajes);
+      } else {
+        const filtrados = personajes.filter(p => {
+          const nombreL = p.nombre.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+          return nombreL.startsWith(letra);
+        });
+        renderizarPersonajes(filtrados);
+      }
+    }
+
+    // Carga inicial
+    renderizarPersonajes(personajes);
+  </script>
+</body>
+</html>
